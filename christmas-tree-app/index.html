@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Christmas Tree Decorator 🎄</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>🎄 Virtual Christmas Tree Decorator ✨</h1>
+            <p class="subtitle">Design and customize your perfect Christmas tree</p>
+        </header>
+
+        <div class="main-content">
+            <div class="tree-section">
+                <div class="tree-container" id="treeContainer">
+                    <svg id="treeSvg" viewBox="0 0 400 600">
+                        <!-- Tree base -->
+                        <polygon id="treeBase" points="150,550 250,550 200,600" fill="#8B4513" />
+                        
+                        <!-- Tree layers -->
+                        <polygon id="treeLayer1" points="50,500 350,500 200,200" fill="#228B22" />
+                        <polygon id="treeLayer2" points="80,450 320,450 200,250" fill="#32CD32" />
+                        <polygon id="treeLayer3" points="110,400 290,400 200,300" fill="#228B22" />
+                        <polygon id="treeLayer4" points="140,350 260,350 200,350" fill="#32CD32" />
+                        
+                        <!-- Star on top -->
+                        <g id="treeStar">
+                            <path d="M200,150 L210,180 L240,180 L215,195 L225,225 L200,210 L175,225 L185,195 L160,180 L190,180 Z" 
+                                  fill="#FFD700" stroke="#FFA500" stroke-width="2"/>
+                        </g>
+                    </svg>
+                    
+                    <!-- Drop zone for ornaments -->
+                    <div class="ornament-zone" id="ornamentZone"></div>
+                </div>
+                
+                <div class="tree-controls">
+                    <div class="control-group">
+                        <label>
+                            <span>Tree Size</span>
+                            <input type="range" id="treeSize" min="0.8" max="1.5" step="0.1" value="1">
+                            <span class="value" id="treeSizeValue">100%</span>
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <span>Tree Color</span>
+                            <select id="treeColor">
+                                <option value="green">🌲 Classic Green</option>
+                                <option value="blue">🔵 Blue Spruce</option>
+                                <option value="white">❄️ Snowy White</option>
+                                <option value="gold">✨ Golden</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="button-group">
+                        <button class="action-btn" id="clearBtn">🗑️ Clear All</button>
+                        <button class="action-btn" id="exportBtn">📸 Export Tree</button>
+                        <button class="action-btn" id="shareBtn">📤 Share Design</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ornaments-panel">
+                <div class="ornaments-section">
+                    <h3>🎁 Ornaments</h3>
+                    <div class="ornaments-grid" id="ornamentsGrid">
+                        <div class="ornament-item" data-type="ball-red" draggable="true">
+                            <div class="ornament-preview ball red">🔴</div>
+                            <span>Red Ball</span>
+                        </div>
+                        <div class="ornament-item" data-type="ball-blue" draggable="true">
+                            <div class="ornament-preview ball blue">🔵</div>
+                            <span>Blue Ball</span>
+                        </div>
+                        <div class="ornament-item" data-type="ball-gold" draggable="true">
+                            <div class="ornament-preview ball gold">🟡</div>
+                            <span>Gold Ball</span>
+                        </div>
+                        <div class="ornament-item" data-type="star" draggable="true">
+                            <div class="ornament-preview star">⭐</div>
+                            <span>Star</span>
+                        </div>
+                        <div class="ornament-item" data-type="bell" draggable="true">
+                            <div class="ornament-preview bell">🔔</div>
+                            <span>Bell</span>
+                        </div>
+                        <div class="ornament-item" data-type="gift" draggable="true">
+                            <div class="ornament-preview gift">🎁</div>
+                            <span>Gift</span>
+                        </div>
+                        <div class="ornament-item" data-type="candy" draggable="true">
+                            <div class="ornament-preview candy">🍬</div>
+                            <span>Candy Cane</span>
+                        </div>
+                        <div class="ornament-item" data-type="snowflake" draggable="true">
+                            <div class="ornament-preview snowflake">❄️</div>
+                            <span>Snowflake</span>
+                        </div>
+                        <div class="ornament-item" data-type="angel" draggable="true">
+                            <div class="ornament-preview angel">👼</div>
+                            <span>Angel</span>
+                        </div>
+                        <div class="ornament-item" data-type="heart" draggable="true">
+                            <div class="ornament-preview heart">❤️</div>
+                            <span>Heart</span>
+                        </div>
+                        <div class="ornament-item" data-type="light" draggable="true">
+                            <div class="ornament-preview light">💡</div>
+                            <span>Light</span>
+                        </div>
+                        <div class="ornament-item" data-type="bow" draggable="true">
+                            <div class="ornament-preview bow">🎀</div>
+                            <span>Bow</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lights-section">
+                    <h3>💡 Lights</h3>
+                    <div class="lights-controls">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enableLights">
+                            <span>Enable Twinkling Lights</span>
+                        </label>
+                        <div class="control-group">
+                            <label>
+                                <span>Light Color</span>
+                                <select id="lightColor">
+                                    <option value="multicolor">🌈 Multicolor</option>
+                                    <option value="warm">🕯️ Warm White</option>
+                                    <option value="cool">❄️ Cool White</option>
+                                    <option value="red">🔴 Red</option>
+                                    <option value="blue">🔵 Blue</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="control-group">
+                            <label>
+                                <span>Speed</span>
+                                <input type="range" id="lightSpeed" min="0.5" max="3" step="0.1" value="1">
+                                <span class="value" id="lightSpeedValue">1.0</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="garland-section">
+                    <h3>🎀 Garland</h3>
+                    <div class="garland-controls">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enableGarland">
+                            <span>Add Garland</span>
+                        </label>
+                        <div class="control-group">
+                            <label>
+                                <span>Style</span>
+                                <select id="garlandStyle">
+                                    <option value="tinsel">✨ Tinsel</option>
+                                    <option value="beads">🔴 Beads</option>
+                                    <option value="ribbon">🎀 Ribbon</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
