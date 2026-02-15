@@ -1,0 +1,156 @@
+/**
+ * API Server for CodeReview AI
+ * REST API for programmatic access to code reviews
+ */
+
+import express, { Request, Response } from 'express';
+import bodyParser from 'body-parser';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Analyzer } from './engine/analyzer';
+import { FeedbackGenerator } from './feedback/generator';
+import { Learner } from './learning/learner';
+import { initializeConfigManager } from './config/manager';
+import { initializeStore } from './db/store';
+
+const app = express();
+app.use(bodyParser.json({ limit: '10mb' }));
+
+// Initialize services
+let analyzer: Analyzer;
+let feedbackGenerator: FeedbackGenerator;
+let learner: Learner;
+
+async function initServices() {
+  await initializeConfigManager();
+  await initializeStore();
+  
+  analyzer = new Analyzer();
+  feedbackGenerator = new FeedbackGenerator();
+  learner = new Learner();
+  
+  console.log('Services initialized');
+}
+
+initServices().catch(console.error);
+
+// Health check
+app.get('/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', service: 'codereview-api' });
+});
+
+// Analyze endpoint
+app.post('/api/analyze', async (req: Request, res: Response) => {
+  try {
+    const { path: targetPath, options } = req.body;
+    
+    if (!targetPath) {
+      return res.status(400).json({ error: 'Missing path parameter' });
+    }
+    
+    const stats = fs.statSync(targetPath);
+    let result;
+    
+    if (stats.isFile()) {
+      const analysis = await analyzer.analyzeFile(targetPath);
+      result = {
+        files: [analysis],
+        summary: {
+          totalFiles: 1,
+          totalIssues: analysis.issues.length,
+          critical: analysis.issues.filter((i: any) => i.severity === 'critical').length,
+          warning: analysis.issues.filter((i: any) => i.severity === 'warning').length,
+          suggestion: analysis.issues.filter((i: any) => i.severity === 'suggestion').length,
+          byCategory: {
+            security: analysis.issues.filter((i: any) => i.category === 'security').length,
+            performance: analysis.issues.filter((i: any) => i.category === 'performance').length,
+            bestPractices: analysis.issues.filter((i: any) => i.category === 'bestPractices').length,
+            style: analysis.issues.filter((i: any) => i.category === 'style').length,
+            documentation: analysis.issues.filter((i: any) => i.category === 'documentation').length
+          }
+        },
+        duration: 0,
+        timestamp: new Date()
+      };
+    } else {
+      result = await analyzer.analyzeDirectory(targetPath);
+    }
+    
+    const output = options?.format === 'json' 
+      ? feedbackGenerator.generateJSONOutput(result)
+      : result;
+    
+    res.json(output);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Analyze code content directly
+app.post('/api/analyze/content', async (req: Request, res: Response) => {
+  try {
+    const { code, filename, language } = req.body;
+    
+    if (!code) {
+      return res.status(400).json({ error: 'Missing code parameter' });
+    }
+    
+    const tempFile = path.join('/tmp', filename || 'temp.js');
+    fs.writeFileSync(tempFile, code);
+    
+    const analysis = await analyzer.analyzeFile(tempFile);
+    fs.unlinkSync(tempFile);
+    
+    res.json(analysis);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Learn endpoint
+app.post('/api/learn', async (req: Request, res: Response) => {
+  try {
+    const { path: targetPath } = req.body;
+    
+    if (!targetPath) {
+      return res.status(400).json({ error: 'Missing path parameter' });
+    }
+    
+    const standards = await learner.learnFromCodebase(targetPath);
+    res.json({ standards });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Standards endpoint
+app.get('/api/standards', (_req: Request, res: Response) => {
+  try {
+    const standards = learner.getStandards();
+    res.json({ standards });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Feedback endpoint
+app.post('/api/feedback', async (req: Request, res: Response) => {
+  try {
+    const { issueId, accepted, comment } = req.body;
+    
+    if (!issueId || accepted === undefined) {
+      return res.status(400).json({ error: 'Missing required parameters' });
+    }
+    
+    learner.processFeedback(issueId, accepted, comment);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 CodeReview API Server running on port ${PORT}`);
+});
