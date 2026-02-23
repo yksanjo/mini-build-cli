@@ -1,5 +1,12 @@
 # mini-build-cli
 
+Production-grade project scaffold focused on reliability, maintainability, and fast onboarding.
+
+[![CI](https://img.shields.io/github/actions/workflow/status/yksanjo/mini-build-cli/ci.yml?branch=main&label=ci)](https://github.com/yksanjo/mini-build-cli/actions)
+![License](https://img.shields.io/github/license/yksanjo/mini-build-cli)
+![Last Commit](https://img.shields.io/github/last-commit/yksanjo/mini-build-cli)
+![Repo Size](https://img.shields.io/github/repo-size/yksanjo/mini-build-cli)
+
 ## Detailed Description
 
 mini-build-cli is maintained as an industry-grade software project with production-ready engineering practices.  
